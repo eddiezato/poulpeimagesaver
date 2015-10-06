@@ -64,7 +64,12 @@ function onPathsListChange(prefName)
   if ((pathsList.length > 1)||(pathsList[0] != ""))
   {
     for (var i = 0; i < pathsList.length; i ++)
-      namesList.push(PathIO.basename(pathsList[i]));
+    {
+      if ((pathsList[i].match(new RegExp("^([a-zA-Z]\\:\\\\)$"))) ||
+      	  (pathsList[i] == "/"))
+      	namesList.push(pathsList[i].substring(0, 1));
+      else namesList.push(PathIO.basename(pathsList[i]));
+    }
     panel.height += (pathsList.length * 25) + 8;
   }
   panel.port.emit("links-array", namesList); //send data to panel
@@ -91,10 +96,15 @@ function listTabs(path)
   {
     var fileName = imageUrl.substr(imageUrl.lastIndexOf("/") + 1);
     //if preference "ifFileExists" equal "Rename" and saving file exists then add random string to name
-    if (!preferences.ifFileExists)
-      if (FileIO.exists(PathIO.join(path, fileName)))
-      	fileName = addRandom(fileName);
-    downloadImage(imageUrl, path, fileName);
+    if (FileIO.exists(PathIO.join(path, fileName)))
+    {
+    	if (preferences.ifFileExists != 2)
+    	{
+    		if (preferences.ifFileExists == 0) fileName = addRandom(fileName);
+    		downloadImage(imageUrl, path, fileName);
+    	}
+    }
+    else downloadImage(imageUrl, path, fileName);
   }
 }
 
